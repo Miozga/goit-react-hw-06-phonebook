@@ -1,12 +1,22 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
 
+const loadContactsFromLocalStorage = () => {
+  const contacts = localStorage.getItem('contacts');
+  return contacts ? JSON.parse(contacts) : [];
+};
+
+const saveContactsToLocalStorage = contacts => {
+  localStorage.setItem('contacts', JSON.stringify(contacts));
+};
+
 const contactsSlice = createSlice({
   name: 'contacts',
-  initialState: [],
+  initialState: loadContactsFromLocalStorage(),
   reducers: {
     addContact: {
       reducer(state, action) {
         state.push(action.payload);
+        saveContactsToLocalStorage(state);
       },
       prepare(name, number) {
         return {
@@ -19,7 +29,11 @@ const contactsSlice = createSlice({
       },
     },
     deleteContact(state, action) {
-      return state.filter(contact => contact.id !== action.payload);
+      const updatedState = state.filter(
+        contact => contact.id !== action.payload
+      );
+      saveContactsToLocalStorage(updatedState);
+      return updatedState;
     },
   },
 });
